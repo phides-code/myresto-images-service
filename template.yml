@@ -44,11 +44,13 @@ Resources:
           AWS_CF_TOKEN: !Ref AwsCfToken  # comes from --parameter-overrides
           AWS_BUCKET_NAME: !Ref ImageBucketName
       Policies:
-        - AWSLambdaExecute
+        - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
+                - s3:PutObject
+                - s3:GetObject
                 - s3:DeleteObject
               Resource:
                 - !Sub arn:aws:s3:::${ImageBucketName}/assets/*
