@@ -11,7 +11,9 @@ init: build
 
 .PHONY: deploy
 deploy: build
-	sam deploy --parameter-overrides AwsCfToken="$(AWS_CF_TOKEN)"
+	sam deploy --parameter-overrides \
+	ParameterKey=AwsCFToken,ParameterValue="$$AWS_CF_TOKEN" \ 
+	ParameterKey=ImageBucketName,ParameterValue="$$AWS_BUCKET_NAME"
 
 .PHONY: delete
 delete:

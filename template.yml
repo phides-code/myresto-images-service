@@ -6,6 +6,9 @@ Parameters:
     Type: String
     NoEcho: true
     Description: Token for API auth (e.g. Cloudflare or custom); set via --parameter-overrides AwsCfToken=xxx when deploying
+  ImageBucketName:
+    Type: String
+    Description: Name of the S3 bucket for images
 
 Resources:
   MyrestoImagesService:
@@ -16,7 +19,7 @@ Resources:
       StageName: Prod
       Auth:
       Cors:
-        AllowMethods: "'OPTIONS, POST, GET, PUT, DELETE'"
+        AllowMethods: "'OPTIONS, POST, DELETE'"
         AllowHeaders: "'Content-Type, X-CF-Token'"
         # AllowOrigin: "'http://localhost:5173'" 
         AllowOrigin: "'https://d3knrnqllqxltd.cloudfront.net'" 
@@ -41,8 +44,14 @@ Resources:
           AWS_CF_TOKEN: !Ref AwsCfToken  # comes from --parameter-overrides
       Policies:
         - AWSLambdaExecute
-        - DynamoDBCrudPolicy:
-            TableName: !Ref MyrestoImagesTable
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:DeleteObject
+              Resource:
+                - !Sub arn:aws:s3:::${ImageBucketName}/assets/*
+
       Events:
         ImagesOptions:
           Type: Api
@@ -55,19 +64,6 @@ Resources:
           Properties:
             Path: /images/{id}
             Method: OPTIONS
-            RestApiId: !Ref MyrestoImagesService
-        GetImage:
-          Type: Api
-          Properties:
-            Path: /images/{id}
-            Method: GET
-            RestApiId: !Ref MyrestoImagesService
-            
-        GetImages:
-          Type: Api
-          Properties:
-            Path: /images
-            Method: GET
             RestApiId: !Ref MyrestoImagesService
             
         PutImage:
@@ -84,26 +80,5 @@ Resources:
             Method: DELETE
             RestApiId: !Ref MyrestoImagesService
             
-        UpdateImage:
-          Type: Api
-          Properties:
-            Path: /images/{id}
-            Method: PUT
-            RestApiId: !Ref MyrestoImagesService
-            
     Metadata:
       BuildMethod: makefile
-
-  MyrestoImagesTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: MyrestoImages
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2

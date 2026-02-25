@@ -4,18 +4,22 @@ import (
 	"log"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-var db *dynamodb.Client
+var myS3 BucketBasics
 
 func init() {
-	dbClient, err := getDbClient()
+	s3Client, err := getS3Client()
+
 	if err != nil {
-		log.Println("init() error running getClient(): ")
+		log.Println("init() error running getS3Client(): ")
 		log.Fatal(err)
 	}
-	db = dbClient
+
+	// Create an instance of BucketBasics with the S3 client
+	myS3 = BucketBasics{
+		S3Client: &s3Client,
+	}
 }
 
 func main() {
