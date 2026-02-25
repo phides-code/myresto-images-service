@@ -42,6 +42,7 @@ Resources:
       Environment:
         Variables:
           AWS_CF_TOKEN: !Ref AwsCfToken  # comes from --parameter-overrides
+          AWS_BUCKET_NAME: !Ref ImageBucketName
       Policies:
         - AWSLambdaExecute
         - Version: "2012-10-17"
