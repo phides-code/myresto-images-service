@@ -1,0 +1,39 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+    push:
+        branches: ['main']
+    pull_request:
+        branches: ['main']
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        env:
+            SAM_STACK_NAME: myresto-images-service
+            SAM_REGION: us-east-1
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
+            - name: Set up Go
+              uses: actions/setup-go@v6
+
+            - name: SAM Build
+              run: sam build
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v5
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.SAM_REGION }}
+
+            - name: Deploy with SAM
+              run: |
+                  make deploy
+              env:
+                  AWS_CF_TOKEN: ${{ secrets.AWS_CF_TOKEN }}

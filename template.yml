@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AwsCfToken:
+    Type: String
+    NoEcho: true
+    Description: Token for API auth (e.g. Cloudflare or custom); set via --parameter-overrides AwsCfToken=xxx when deploying
+
+Resources:
+  MyrestoImagesService:
+    Type: AWS::Serverless::Api
+    Description: "Serverless API for CRUD operations"
+    Properties:
+      Name: "myresto-images-service"
+      StageName: Prod
+      Auth:
+      Cors:
+        AllowMethods: "'OPTIONS, POST, GET, PUT, DELETE'"
+        AllowHeaders: "'Content-Type, X-CF-Token'"
+        # AllowOrigin: "'http://localhost:5173'" 
+        AllowOrigin: "'https://d3knrnqllqxltd.cloudfront.net'" 
+
+      # Logging settings
+      MethodSettings:
+        - LoggingLevel: INFO
+          ResourcePath: "/*"
+          HttpMethod: "*"
+          MetricsEnabled: true
+          DataTraceEnabled: true
+
+  MyrestoImagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 10
+      Handler: bootstrap
+      Runtime: provided.al2023
+      MemorySize: 512
+      Environment:
+        Variables:
+          AWS_CF_TOKEN: !Ref AwsCfToken  # comes from --parameter-overrides
+      Policies:
+        - AWSLambdaExecute
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MyrestoImagesTable
+      Events:
+        ImagesOptions:
+          Type: Api
+          Properties:
+            Path: /images
+            Method: OPTIONS
+            RestApiId: !Ref MyrestoImagesService
+        ImagesOptionsId:
+          Type: Api
+          Properties:
+            Path: /images/{id}
+            Method: OPTIONS
+            RestApiId: !Ref MyrestoImagesService
+        GetImage:
+          Type: Api
+          Properties:
+            Path: /images/{id}
+            Method: GET
+            RestApiId: !Ref MyrestoImagesService
+            
+        GetImages:
+          Type: Api
+          Properties:
+            Path: /images
+            Method: GET
+            RestApiId: !Ref MyrestoImagesService
+            
+        PutImage:
+          Type: Api
+          Properties:
+            Path: /images
+            Method: POST
+            RestApiId: !Ref MyrestoImagesService
+            
+        DeleteImage:
+          Type: Api
+          Properties:
+            Path: /images/{id}
+            Method: DELETE
+            RestApiId: !Ref MyrestoImagesService
+            
+        UpdateImage:
+          Type: Api
+          Properties:
+            Path: /images/{id}
+            Method: PUT
+            RestApiId: !Ref MyrestoImagesService
+            
+    Metadata:
+      BuildMethod: makefile
+
+  MyrestoImagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: MyrestoImages
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
