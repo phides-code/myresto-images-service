@@ -38,3 +38,4 @@ jobs:
               env:
                   AWS_CF_TOKEN: ${{ secrets.AWS_CF_TOKEN }}
                   AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+                  ADMIN_KEY: ${{ secrets.ADMIN_KEY }}

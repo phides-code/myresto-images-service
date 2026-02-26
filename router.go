@@ -24,7 +24,7 @@ var validate *validator.Validate = validator.New()
 
 var headers = map[string]string{
 	"Access-Control-Allow-Origin":  OriginURL,
-	"Access-Control-Allow-Headers": "Content-Type, X-CF-Token",
+	"Access-Control-Allow-Headers": "Content-Type, X-CF-Token, x-admin-key",
 }
 
 type ImageData struct {
@@ -51,9 +51,9 @@ func router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIG
 
 	switch req.HTTPMethod {
 	case "POST":
-		return processPost(req)
+		return handleAdminOnly(req, processPost)
 	case "DELETE":
-		return processDelete(req)
+		return handleAdminOnly(req, processDelete)
 	case "OPTIONS":
 		return processOptions()
 	default:

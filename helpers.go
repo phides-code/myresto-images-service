@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -54,4 +55,34 @@ func mergeHeaders(baseHeaders, additionalHeaders map[string]string) map[string]s
 		mergedHeaders[key] = value
 	}
 	return mergedHeaders
+}
+
+func isValidAdminKey(providedAdminKey string) bool {
+	adminKey := os.Getenv("ADMIN_KEY")
+
+	if adminKey == "" {
+		log.Println("isValidAdminKey() got blank adminKey")
+		return false
+	}
+
+	return providedAdminKey == adminKey
+}
+
+func handleAdminOnly(
+	req events.APIGatewayProxyRequest,
+	handler func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error),
+) (events.APIGatewayProxyResponse, error) {
+	var providedAdminKey string
+
+	if localMode {
+		providedAdminKey = req.Headers["X-Admin-Key"]
+	} else {
+		providedAdminKey = req.Headers["x-admin-key"]
+	}
+
+	if !isValidAdminKey(providedAdminKey) {
+		log.Println("handleAdminOnly() error: AdminKey mismatch")
+		return clientError(http.StatusUnauthorized)
+	}
+	return handler(req)
 }

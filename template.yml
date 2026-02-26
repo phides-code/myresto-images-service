@@ -9,18 +9,22 @@ Parameters:
   ImageBucketName:
     Type: String
     Description: Name of the S3 bucket for images
+  AdminKey:
+    Type: String
+    NoEcho: true
+    Description: Key for frontend admin access set via --parameter-overrides AdminKey=xxx when deploying
 
 Resources:
   MyrestoImagesService:
     Type: AWS::Serverless::Api
-    Description: "Serverless API for CRUD operations"
+    Description: "Serverless API for S3 post/delete"
     Properties:
       Name: "myresto-images-service"
       StageName: Prod
       Auth:
       Cors:
         AllowMethods: "'OPTIONS, POST, DELETE'"
-        AllowHeaders: "'Content-Type, X-CF-Token'"
+        AllowHeaders: "'Content-Type, X-CF-Token, x-admin-key'"
         # AllowOrigin: "'http://localhost:5173'" 
         AllowOrigin: "'https://d3knrnqllqxltd.cloudfront.net'" 
 
@@ -43,6 +47,7 @@ Resources:
         Variables:
           AWS_CF_TOKEN: !Ref AwsCfToken  # comes from --parameter-overrides
           AWS_BUCKET_NAME: !Ref ImageBucketName
+          ADMIN_KEY: !Ref AdminKey          
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"
