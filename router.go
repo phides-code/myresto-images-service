@@ -35,6 +35,9 @@ type ImageData struct {
 func router(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Println("router() received " + req.HTTPMethod + " request")
 
+	headersJSON, _ := json.Marshal(req.Headers)
+	log.Printf("router() received %s request, headers=%s", req.HTTPMethod, headersJSON)
+
 	if !localMode {
 		awsCfToken := os.Getenv("AWS_CF_TOKEN")
 

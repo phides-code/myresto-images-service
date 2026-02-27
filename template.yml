@@ -25,8 +25,8 @@ Resources:
       Cors:
         AllowMethods: "'OPTIONS, POST, DELETE'"
         AllowHeaders: "'Content-Type, X-CF-Token, x-admin-key'"
-        # AllowOrigin: "'http://localhost:5173'" 
-        AllowOrigin: "'https://d3knrnqllqxltd.cloudfront.net'" 
+        AllowOrigin: "'http://localhost:5173'" 
+        # AllowOrigin: "'https://d3knrnqllqxltd.cloudfront.net'" 
 
       # Logging settings
       MethodSettings:
