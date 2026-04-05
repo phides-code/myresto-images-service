@@ -58,7 +58,7 @@ Resources:
                 - s3:GetObject
                 - s3:DeleteObject
               Resource:
-                - !Sub arn:aws:s3:::${ImageBucketName}/assets/*
+                - !Sub arn:aws:s3:::${ImageBucketName}/images/*
 
       Events:
         ImagesOptions:
